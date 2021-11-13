@@ -1,6 +1,7 @@
 # amazon price tracker
 # 2021-11-13
-# kyamanywa Hamza
+# Kyamanywa Hamza
+# must provide headers, desired price and item url
 
 import os
 import scrapper
@@ -10,6 +11,7 @@ import mail
 gmail_user = os.getenv('MY_GMAIL')
 gmail_password = os.getenv('MY_GMAIL_PASSWORD')
 
+desired_price = 25
 item_url = 'https://www.amazon.com/Carhartt-Midweight-Sleeve-Sweatshirt-Regular/dp/B002G9UD8C/ref=sr_1_2?keywords=hoodies+for+men+winter&qid=1636803926&sr=8-2'
 
 header = {
@@ -20,18 +22,23 @@ header = {
 sender = 'hamzamycode@gmail.com'
 receivers = ['sanshinehamza@gmail.com', 'untilhamza@gmail.com']
 
-
-
-subject = 'SMTP e-mail test'
-receivers = ['untilhamza@gmail.com', 'sanshinehamza@gmail.com']
-content = ''' This is a test email message. '''
-
 response = scrapper.send_request(item_url, header)
 soup = scrapper.scrap(response)
+# print(soup.title)
+
+price_tag = soup.select_one(".a-price > .a-offscreen")
+
+hoodie_price = price_tag.getText().split('$')[1]
+
+# print(hoodie_price)
 
 
-mail_server = mail.Mail()
-mail_server.send(receivers, subject, content)
+if float(hoodie_price) <= desired_price:
+    subject = 'Buy item from Amazon'
+    receivers = ['untilhamza@gmail.com', 'sanshinehamza@gmail.com']
+    content = f' This is mail from you bot. \n You can now by the hoodie from {item_url} for ${hoodie_price}'
+    mail_server = mail.Mail(gmail_user, gmail_password)
+    mail_server.send(receivers, subject, content)
 
 # testing request exceptions
 #
